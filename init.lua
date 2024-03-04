@@ -99,7 +99,7 @@ vim.g.maplocalleader = ' '
 vim.opt.number = true
 -- You can also add relative line numbers, for help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
+vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
@@ -151,6 +151,9 @@ vim.opt.scrolloff = 10
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
+-- Custom Plugin Keymaps
+vim.keymap.set('n', '<leader>e', '<Cmd>Neotree toggle<CR>')
+
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
@@ -158,7 +161,7 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
-vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
+vim.keymap.set('n', '<leader>k', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
@@ -179,10 +182,10 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 --  Use CTRL+<hjkl> to switch between windows
 --
 --  See `:help wincmd` for a list of all window commands
-vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+vim.keymap.set('n', '<C-Left>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
+vim.keymap.set('n', '<C-Right>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
+vim.keymap.set('n', '<C-Down>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
+vim.keymap.set('n', '<C-Top>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -364,14 +367,14 @@ require('lazy').setup {
       local builtin = require 'telescope.builtin'
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
-      vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
+      vim.keymap.set('n', '<leader><leader>', builtin.find_files, { desc = '[S]earch [F]iles' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
-      vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+      vim.keymap.set('n', '<leader>se', builtin.buffers, { desc = '[ ] Find existing buffers' })
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
@@ -618,7 +621,7 @@ require('lazy').setup {
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
-        -- javascript = { { "prettierd", "prettier" } },
+        javascript = { { 'prettierd', 'prettier' } },
       },
     },
   },
@@ -808,6 +811,126 @@ require('lazy').setup {
   --
   -- require 'kickstart.plugins.debug',
   -- require 'kickstart.plugins.indent_line',
+
+  {
+    'folke/flash.nvim',
+    event = 'VeryLazy',
+    ---@type Flash.Config
+    opts = {},
+    -- stylua: ignore
+    keys = {
+      { "s",     mode = { "n", "x", "o" }, function() require("flash").jump() end,              desc = "Flash" },
+      { "S",     mode = { "n", "x", "o" }, function() require("flash").treesitter() end,        desc = "Flash Treesitter" },
+      { "r",     mode = "o",               function() require("flash").remote() end,            desc = "Remote Flash" },
+      { "R",     mode = { "o", "x" },      function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+      { "<c-s>", mode = { "c" },           function() require("flash").toggle() end,            desc = "Toggle Flash Search" },
+    },
+  },
+
+  {
+    'theprimeagen/harpoon',
+    branch = 'harpoon2',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    config = function()
+      require('harpoon'):setup()
+    end,
+    keys = {
+      {
+        '<leader>A',
+        function()
+          require('harpoon'):list():append()
+        end,
+        desc = 'harpoon file',
+      },
+      {
+        '<leader>a',
+        function()
+          local harpoon = require 'harpoon'
+          harpoon.ui:toggle_quick_menu(harpoon:list())
+        end,
+        desc = 'harpoon quick menu',
+      },
+      {
+        '<leader>1',
+        function()
+          require('harpoon'):list():select(1)
+        end,
+        desc = 'harpoon to file 1',
+      },
+      {
+        '<leader>2',
+        function()
+          require('harpoon'):list():select(2)
+        end,
+        desc = 'harpoon to file 2',
+      },
+      {
+        '<leader>3',
+        function()
+          require('harpoon'):list():select(3)
+        end,
+        desc = 'harpoon to file 3',
+      },
+      {
+        '<leader>4',
+        function()
+          require('harpoon'):list():select(4)
+        end,
+        desc = 'harpoon to file 4',
+      },
+      {
+        '<leader>5',
+        function()
+          require('harpoon'):list():select(5)
+        end,
+        desc = 'harpoon to file 5',
+      },
+    },
+  },
+
+  {
+    'karb94/neoscroll.nvim',
+    config = function()
+      require('neoscroll').setup {}
+    end,
+  },
+
+  {
+    'windwp/nvim-autopairs',
+    -- Optional dependency
+    dependencies = { 'hrsh7th/nvim-cmp' },
+    config = function()
+      require('nvim-autopairs').setup {}
+      -- If you want to automatically add `(` after selecting a function or method
+      local cmp_autopairs = require 'nvim-autopairs.completion.cmp'
+      local cmp = require 'cmp'
+      cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
+    end,
+  },
+
+  {
+    'nvim-neo-tree/neo-tree.nvim',
+    branch = 'v3.x',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'nvim-tree/nvim-web-devicons', -- not strictly required, but recommended
+      'MunifTanjim/nui.nvim',
+      -- "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
+    },
+    config = function()
+      require('neo-tree').setup {
+        filesystem = {
+          filtered_items = {
+            visible = true, -- This is what you want: If you set this to `true`, all "hide" just mean "dimmed out"
+          },
+        },
+      }
+    end,
+  },
+
+  {
+    'chaoren/vim-wordmotion',
+  },
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
