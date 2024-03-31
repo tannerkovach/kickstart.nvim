@@ -102,7 +102,7 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
-vim.opt.mouse = 'a'
+-- vim.opt.mouse = 'a'
 
 -- Don't show the mode, since it's already in status line
 vim.opt.showmode = false
@@ -113,7 +113,7 @@ vim.opt.showmode = false
 vim.opt.clipboard = 'unnamedplus'
 
 -- Enable break indent
-vim.opt.breakindent = true
+vim.opt.breakindent = false
 
 -- Save undo history
 vim.opt.undofile = true
@@ -148,8 +148,21 @@ vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
 
+vim.opt.tabstop = 2
+vim.opt.softtabstop = 2
+vim.opt.shiftwidth = 2
+
+vim.o.foldcolumn = '0'
+vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
+vim.o.foldlevelstart = 99
+vim.o.foldenable = true
+vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
+
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
+
+-- desc = 'Paste without yanking'
+vim.keymap.set({ 'x', 'v' }, 'p', '"_dP', { noremap = true, silent = true })
 
 -- Custom Plugin Keymaps
 vim.keymap.set('n', '<leader>e', '<Cmd>Neotree toggle<CR>')
@@ -223,7 +236,7 @@ vim.opt.rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup {
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
-  'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
+  -- 'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -236,7 +249,6 @@ require('lazy').setup {
 
   -- "gc" to comment visual regions/lines
   { 'numToStr/Comment.nvim', opts = {} },
-
   -- Here is a more advanced example where we pass configuration
   -- options to `gitsigns.nvim`. This is equivalent to the following lua:
   --    require('gitsigns').setup({ ... })
@@ -270,22 +282,22 @@ require('lazy').setup {
   -- after the plugin has been loaded:
   --  config = function() ... end
 
-  { -- Useful plugin to show you pending keybinds.
-    'folke/which-key.nvim',
-    event = 'VimEnter', -- Sets the loading event to 'VimEnter'
-    config = function() -- This is the function that runs, AFTER loading
-      require('which-key').setup()
-
-      -- Document existing key chains
-      require('which-key').register {
-        ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-        ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-        ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-        ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-        ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
-      }
-    end,
-  },
+  -- { -- Useful plugin to show you pending keybinds.
+  --   'folke/which-key.nvim',
+  --   event = 'VimEnter', -- Sets the loading event to 'VimEnter'
+  --   config = function() -- This is the function that runs, AFTER loading
+  --     require('which-key').setup()
+  --
+  --     -- Document existing key chains
+  --     require('which-key').register {
+  --       ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
+  --       ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
+  --       ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
+  --       ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
+  --       ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
+  --     }
+  --   end,
+  -- },
 
   -- NOTE: Plugins can specify dependencies.
   --
@@ -621,7 +633,7 @@ require('lazy').setup {
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
-        javascript = { { 'prettierd', 'prettier' } },
+        tmpl = { { 'prettierd', 'prettier' } },
       },
     },
   },
@@ -748,10 +760,11 @@ require('lazy').setup {
       --  - va)  - [V]isually select [A]round [)]paren
       --  - yinq - [Y]ank [I]nside [N]ext [']quote
       --  - ci'  - [C]hange [I]nside [']quote
+      -- Add/delete/replace surroundings (brackets, quotes, etc.)
       require('mini.ai').setup { n_lines = 500 }
 
-      -- Add/delete/replace surroundings (brackets, quotes, etc.)
-      --
+      require('mini.move').setup {}
+
       -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
       -- - sd'   - [S]urround [D]elete [']quotes
       -- - sr)'  - [S]urround [R]eplace [)] [']
@@ -825,6 +838,90 @@ require('lazy').setup {
       { "R",     mode = { "o", "x" },      function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
       { "<c-s>", mode = { "c" },           function() require("flash").toggle() end,            desc = "Toggle Flash Search" },
     },
+  },
+
+  {
+    'github/copilot.vim',
+  },
+
+  {
+    'briangwaltney/paren-hint.nvim',
+    lazy = false,
+    config = function()
+      -- you can create a custom highlight group for the ghost text with the below command.
+      -- change the `highlight` option to `parenhint` if you use this method.
+      -- vim.api.nvim_exec([[ highlight parenhint guifg='#56633E' ]], false)
+      require('paren-hint').setup {
+        -- Include the opening paren in the ghost text
+        include_paren = true,
+
+        -- Show ghost text when cursor is anywhere on the line that includes the close paren rather just when the cursor is on the close paren
+        anywhere_on_line = true,
+
+        -- show the ghost text when the opening paren is on the same line as the close paren
+        show_same_line_opening = false,
+
+        -- style of the ghost text using highlight group
+        -- :Telescope highlights to see the available highlight groups if you have telescope installed
+        highlight = 'Comment',
+
+        -- excluded filetypes
+        excluded_filetypes = {
+          'lspinfo',
+          'packer',
+          'checkhealth',
+          'help',
+          'man',
+          'gitcommit',
+          'TelescopePrompt',
+          'TelescopeResults',
+          '',
+        },
+        -- excluded buftypes
+        excluded_buftypes = {
+          'terminal',
+          'nofile',
+          'quickfix',
+          'prompt',
+        },
+      }
+    end,
+  },
+
+  {
+    'kevinhwang91/promise-async',
+  },
+
+  {
+    'kevinhwang91/nvim-ufo',
+    lazy = false,
+    config = function()
+      vim.api.nvim_create_autocmd('FileType', {
+        pattern = { 'nvcheatsheet', 'neo-tree' },
+        callback = function()
+          require('ufo').detach()
+          vim.opt_local.foldenable = false
+        end,
+      })
+
+      -- Using ufo provider need remap `zR` and `zM`. If Neovim is 0.6.1, remap yourself
+      vim.keymap.set('n', 'zR', require('ufo').openAllFolds)
+      vim.keymap.set('n', 'zM', require('ufo').closeAllFolds)
+
+      local capabilities = vim.lsp.protocol.make_client_capabilities()
+      capabilities.textDocument.foldingRange = {
+        dynamicRegistration = false,
+        lineFoldingOnly = true,
+      }
+      local language_servers = require('lspconfig').util.available_servers() -- or list servers manually like {'gopls', 'clangd'}
+      for _, ls in ipairs(language_servers) do
+        require('lspconfig')[ls].setup {
+          capabilities = capabilities,
+          -- you can add other fields for setting up lsp server in this table
+        }
+      end
+      require('ufo').setup()
+    end,
   },
 
   {
